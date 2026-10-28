@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Input Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .voice-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+        .voice-button.listening {
+            background-color: #ef4444;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+        .voice-button:not(.listening) {
+            background-color: #6b7280;
+            color: white;
+        }
+        .voice-button:hover {
+            transform: scale(1.05);
+        }
+        .transcript {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            min-height: 20px;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Voice Input Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Basic Voice Recognition</h2>
+        <p>Click the button below and speak to test voice recognition:</p>
+        <button id="voiceBtn" class="voice-button">🎤 Start Voice Input</button>
+        <div id="transcript" class="transcript">Transcript will appear here...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Browser Support</h2>
+        <div id="browserSupport"></div>
+    </div>
+
+    <script>
+        // Check browser support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const browserSupportDiv = document.getElementById('browserSupport');
+        
+        if (SpeechRecognition) {
+            browserSupportDiv.innerHTML = '<p style="color: green;">✅ Speech recognition is supported in this browser</p>';
+        } else {
+            browserSupportDiv.innerHTML = '<p style="color: red;">❌ Speech recognition is not supported in this browser</p>';
+        }
+
+        // Voice recognition functionality
+        let recognition = null;
+        let isListening = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            let fullTranscript = '';
+
+            recognition.onresult = (event) => {
+                let interim = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        fullTranscript += transcript + ' ';
+                    } else {
+                        interim += transcript;
+                    }
+                }
+
+                const combined = fullTranscript + interim;
+                document.getElementById('transcript').textContent = combined;
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event);
+                stopListening();
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    recognition.start();
+                }
+            };
+        }
+
+        const voiceBtn = document.getElementById('voiceBtn');
+        const transcriptDiv = document.getElementById('transcript');
+
+        function startListening() {
+            if (recognition && !isListening) {
+                fullTranscript = '';
+                isListening = true;
+                voiceBtn.textContent = '🔴 Stop Voice Input';
+                voiceBtn.classList.add('listening');
+                transcriptDiv.textContent = 'Listening...';
+                recognition.start();
+            }
+        }
+
+        function stopListening() {
+            if (recognition && isListening) {
+                isListening = false;
+                voiceBtn.textContent = '🎤 Start Voice Input';
+                voiceBtn.classList.remove('listening');
+                recognition.stop();
+            }
+        }
+
+        voiceBtn.addEventListener('click', () => {
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        });
+    </script>
+</body>
+</html> 

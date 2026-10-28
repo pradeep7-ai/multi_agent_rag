@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: 30, 58, 138;
+  --color-accent: 79, 70, 229;
+}
+
+body {
+  @apply text-gray-900 dark:text-white;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Message animation */
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-animate-in {
+  animation: messageIn 0.3s ease-out forwards;
+}
+
+/* Improved focus styles */
+:focus {
+  @apply outline-none ring-2 ring-indigo-500 ring-opacity-50;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/* Query Suggestions Styles */
+.query-suggestions {
+  @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-4;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.suggestions-title {
+  @apply text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3;
+  font-size: 0.875rem;
+}
+
+.suggestions-list {
+  @apply grid gap-2 mb-3;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.suggestion-button {
+  @apply w-full text-left p-3 rounded-md border border-gray-200 dark:border-gray-600 
+         bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+         hover:bg-blue-50 dark:hover:bg-gray-600 hover:border-blue-300 dark:hover:border-gray-500
+         transition-all duration-200 text-sm leading-relaxed;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.suggestion-button:hover {
+  @apply transform scale-[1.02];
+}
+
+.suggestion-button:active {
+  @apply transform scale-[0.98];
+}
+
+.refresh-suggestions-button {
+  @apply w-full py-2 px-3 text-xs font-medium text-gray-600 dark:text-gray-400
+         bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600
+         rounded-md hover:bg-gray-200 dark:hover:bg-gray-600
+         transition-colors duration-200;
+}
+
+.retry-button {
+  @apply ml-2 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400
+         bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800
+         rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/30
+         transition-colors duration-200;
+}
+
+.suggestions-loading {
+  @apply flex items-center justify-center py-4 text-gray-500 dark:text-gray-400;
+}
+
+.suggestions-error {
+  @apply flex items-center justify-center py-4 text-red-500 dark:text-red-400;
+}
+
+.loading-spinner {
+  @apply w-4 h-4 border-2 border-gray-300 dark:border-gray-600 border-t-blue-500 
+         rounded-full animate-spin mr-2;
+}
+
+/* Animation for suggestions appearing */
+@keyframes suggestionsIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.query-suggestions {
+  animation: suggestionsIn 0.3s ease-out forwards;
+}
+
+/* Voice Input Button Styles */
+.voice-button {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.voice-button:hover {
+  @apply transform scale-105;
+}
+
+.voice-button:active {
+  @apply transform scale-95;
+}
+
+.voice-button.listening {
+  @apply animate-pulse;
+}
+
+/* Voice transcript styles */
+.voice-transcript {
+  @apply transition-all duration-300 ease-in-out;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .query-suggestions {
+    @apply p-3;
+  }
+  
+  .suggestion-button {
+    @apply p-2 text-xs;
+  }
+  
+  .suggestions-title {
+    @apply text-xs;
+  }
+  
+  /* Make voice button slightly smaller on mobile */
+  .voice-button {
+    @apply p-1.5;
+  }
+  
+  .voice-button svg {
+    @apply w-4 h-4;
+  }
+}

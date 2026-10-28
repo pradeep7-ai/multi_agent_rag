@@ -1,0 +1,11 @@
+{
+  "text": "Probability distributions- Discrete\nS. Devi Yamini\nMarch 3, 2017\nModule 4- I\nMarch 3, 2017\n1 / 21\nS. Sumathi",
+  "file_name": "Prob_Stats_Module_4.pdf",
+  "file_type": "pdf",
+  "word_count": 20,
+  "char_count": 108,
+  "ingested_at": "2025-07-02T22:23:53.476480",
+  "is_table": false,
+  "page_number": 1,
+  "source_type": "pdf"
+}

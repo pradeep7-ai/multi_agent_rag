@@ -1,0 +1,212 @@
+// import React, { createContext, useContext, useState, useEffect } from 'react';
+// import axios from 'axios';
+// import { Message, Chat, Source } from '../types';
+
+// interface ChatContextType {
+//   currentChat: Chat;
+//   chats: Chat[];
+//   messages: Message[];
+//   isLoading: boolean;
+//   error: string | null;
+//   createNewChat: () => void;
+//   switchChat: (chatId: string) => void;
+//   sendMessage: (content: string) => void;
+//   uploadFile: (file: File) => void;
+//   processFile: () => void;
+//   uploadedFile: File | null;
+//   filePreviewData: any[] | null;
+//   downloadLink: string | null;
+//   processingFile: boolean;
+// }
+
+// const API_BASE_URL = 'http://localhost:5000';
+
+// const ChatContext = createContext<ChatContextType | undefined>(undefined);
+
+// export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+//   const [chats, setChats] = useState<Chat[]>([
+//     { id: '1', title: 'New Chat', createdAt: new Date().toISOString() }
+//   ]);
+//   const [currentChat, setCurrentChat] = useState<Chat>(chats[0]);
+//   const [messages, setMessages] = useState<Message[]>([]);
+//   const [isLoading, setIsLoading] = useState<boolean>(false);
+//   const [error, setError] = useState<string | null>(null);
+//   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+//   const [filePreviewData, setFilePreviewData] = useState<any[] | null>(null);
+//   const [downloadLink, setDownloadLink] = useState<string | null>(null);
+//   const [processingFile, setProcessingFile] = useState<boolean>(false);
+
+//   useEffect(() => {
+//     setMessages([]);
+//   }, [currentChat.id]);
+
+//   const createNewChat = () => {
+//     const newChat: Chat = {
+//       id: Date.now().toString(),
+//       title: 'New Chat',
+//       createdAt: new Date().toISOString()
+//     };
+//     setChats([newChat, ...chats]);
+//     setCurrentChat(newChat);
+//     setMessages([]);
+//     setError(null);
+//   };
+
+//   const switchChat = (chatId: string) => {
+//     const chat = chats.find(c => c.id === chatId);
+//     if (chat) {
+//       setCurrentChat(chat);
+//       setError(null);
+//     }
+//   };
+
+//   const sendMessage = async (content: string) => {
+//     if (!content.trim()) return;
+
+//     const userMessage: Message = {
+//       id: Date.now().toString(),
+//       content,
+//       role: 'user',
+//       timestamp: new Date().toISOString()
+//     };
+
+//     setMessages(prev => [...prev, userMessage]);
+//     setIsLoading(true);
+//     setError(null);
+
+//     try {
+//       const response = await axios.post(`${API_BASE_URL}/chat`, {
+//         query: content,
+//         context: ''
+//       });
+
+//       const botMessage: Message = {
+//         id: (Date.now() + 1).toString(),
+//         content: response.data.answer,
+//         role: 'assistant',
+//         timestamp: new Date().toISOString(),
+//         sources: response.data.sources.map((source: [string, string], index: number) => ({
+//           id: `s${index}`,
+//           title: source[1].replace('_enriched.json', '.pdf'),
+//           url: `${API_BASE_URL}/pdf/${encodeURIComponent(source[1].replace('_enriched.json', '.pdf'))}`,
+//           snippet: source[0],
+//           group: 'Documents'
+//         }))
+//       };
+
+//       setMessages(prev => [...prev, botMessage]);
+      
+//       // Update chat title based on first message
+//       if (messages.length === 0) {
+//         const updatedChat = { ...currentChat, title: content.slice(0, 20) + (content.length > 20 ? '...' : '') };
+//         setCurrentChat(updatedChat);
+//         setChats(chats.map(c => c.id === currentChat.id ? updatedChat : c));
+//       }
+      
+//     } catch (err) {
+//       setError('Failed to get response. Please try again.');
+//       console.error('API Error:', err);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   const uploadFile = async (file: File) => {
+//     setUploadedFile(file);
+//     setDownloadLink(null);
+//     setFilePreviewData(null);     // Clear preview first, until new preview loaded
+//     setProcessingFile(false);     // Reset processing flag if needed
+//     setError(null);
+    
+//     // Read Excel file preview
+//     const reader = new FileReader();
+//     reader.onload = async (e) => {
+//       try {
+//         const formData = new FormData();
+//         formData.append('file', file);
+        
+//         // Get preview data from the server
+//         const response = await axios.post(`${API_BASE_URL}/preview-excel`, formData, {
+//           headers: {
+//             'Content-Type': 'multipart/form-data',
+//           },
+//         });
+        
+//         setFilePreviewData(response.data.preview);
+//       } catch (error) {
+//         setError('Error reading file preview');
+//         console.error('File Preview Error:', error);
+//       }
+//     };
+//     reader.readAsArrayBuffer(file);
+//   };
+
+//   const processFile = async () => {
+//     if (!uploadedFile) return;
+
+//     setProcessingFile(true);
+//     setError(null);
+
+//     try {
+//       const formData = new FormData();
+//       formData.append('file', uploadedFile);
+
+//       const response = await axios.post(`${API_BASE_URL}/batch-process`, formData, {
+//         headers: {
+//           'Content-Type': 'multipart/form-data',
+//         },
+//       });
+//       setUploadedFile(null);
+//       setFilePreviewData(null);
+//       setDownloadLink(`${API_BASE_URL}${response.data.download_url}`);
+      
+//       const botMessage: Message = {
+//         id: Date.now().toString(),
+//         content: `I've processed your Excel file "${uploadedFile.name}". The processed file contains:
+// - Original queries from the first column
+// - Generated responses in the "Response" column
+// - Source references in the "Sources" column
+
+// You can download the results using the link below.`,
+//         role: 'assistant',
+//         timestamp: new Date().toISOString()
+//       };
+//       setMessages(prev => [...prev, botMessage]);
+      
+//     } catch (err) {
+//       setError('Failed to process file. Please try again.');
+//       console.error('File Processing Error:', err);
+//     } finally {
+//       setProcessingFile(false);
+//     }
+//   };
+
+//   return (
+//     <ChatContext.Provider value={{
+//       currentChat,
+//       chats,
+//       messages,
+//       isLoading,
+//       error,
+//       createNewChat,
+//       switchChat,
+//       sendMessage,
+//       uploadFile,
+//       processFile,
+//       uploadedFile,
+//       filePreviewData,
+//       downloadLink,
+//       processingFile
+//     }}>
+//       {children}
+//     </ChatContext.Provider>
+//   );
+// };
+
+// export const useChat = (): ChatContextType => {
+//   const context = useContext(ChatContext);
+//   if (context === undefined) {
+//     throw new Error('useChat must be used within a ChatProvider');
+//   }
+//   return context;
+// };
